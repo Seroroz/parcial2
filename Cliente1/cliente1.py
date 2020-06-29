@@ -37,8 +37,10 @@ def on_message(client, userdata, msg):
     print(str(msg.topic))
     #CARTC evalua si solo llega a los  topics audio 
     if str(ver[0]) == "audio":
+        print('ingreso un audio')
         logging.info('autdio Entrando:')
         cli.entrandoAudio(msg.payload)
+        cli.descrypt_wav()
     elif str(ver[0]) == 'usuarios': 
         cli.entradaTexto(msg.payload) 
         cli.descrip_texto() 

@@ -11,3 +11,4 @@
 (usuarios/16/201114651) -> b'A llegado un mensaje a USUARIO 201114651 ->-> 201700512 dice: si funciona el chat'
 (usuarios/16/201114651) -> b'A llegado un mensaje a USUARIO 201114651 ->-> 201700512 dice: si hya  que  ver  lo del audio '
 (usuarios/16/201114651) -> b'A llegado un mensaje a USUARIO 201114651 ->-> 201700512 dice: que onda'
+(audio/16/201114651) -> b'\x0320170051240064'

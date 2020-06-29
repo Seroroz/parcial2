@@ -78,6 +78,24 @@ class ClientMqtt(): #MTEZ se crea la clase ClientMqtt
         des2.close()
         self.enc.decrypt_file('In_tex_decrypt.txt.enc')
 
+    def descrypt_wav(self):
+        des = open('In_Audio_encriptado.wav.enc','rb')
+        info    = des.read()
+        des.close()
+        des2 =open('In_Audio_decryp.wav.enc','wb')
+        des2.write(info)
+        des2.close()
+        #descrypr = open('In_Audio_decryp.wav.enc','wb')
+        #descrypt.write(wavdata)
+        #descrypr.close()
+        self.enc.decrypt_file('In_Audio_decryp.wav.enc')
+        #self.enc.decrypt_file('In_Audio_encriptado.wav.enc')
+        print('termino de hacer el decrypt')
+        ogging.info('inicia reproduccion de audio:') #USEOB COLOCAMOS LA INFO EN EL LOG
+        #os.system('aplay In_Audio_decryp.wav') #USEOB REPRODUCIMOS
+
+    
+
     def on_publish(self, client, userdata, mid): #USEOB METODO PARA PUBLICACION SATISFACTORIA 
         publishText = 'Publicación satisfactoria'
         print(publishText)
@@ -159,11 +177,11 @@ class ClientMqtt(): #MTEZ se crea la clase ClientMqtt
         else:
             UX = USER_ID_3  
         
-        size = (os.stat('Audio_encriptado.wav.enc').st_size) #USEOB SE RECIBE EL TAMAÑO DEL ARCHIVO
-        print(size) 
-        a_enviar = b'\x03' + bytes("201700512", 'utf-8') + bytes(str(size), 'utf-8') #USEOB SE CONCATENA EL MENSAJE A ENVIAR
+        #size = (os.stat('Audio_encriptado.wav.enc').st_size) #USEOB SE RECIBE EL TAMAÑO DEL ARCHIVO
+       # print(size) 
+        #a_enviar = b'\x03' + bytes("201700512", 'utf-8') + bytes(str(size), 'utf-8') #USEOB SE CONCATENA EL MENSAJE A ENVIAR
         self.enviar_audioU(num) #USEOB SE LLAMA AL METODO ENVIAR AUDIO
-        self.client.publish((AUDIO+'/'+GRUPO+'/'+str(UX)),a_enviar) #USEOB SE HACE LA PUBLICACION EN EL TOPIC
+        #self.client.publish((AUDIO+'/'+GRUPO+'/'+str(UX)),a_enviar) #USEOB SE HACE LA PUBLICACION EN EL TOPIC
         logging.info('...enviado') 
 
     def sendAudioRoom(self,num): #USEOB METODO PARA EL ENVÍO DE AUDIO A SALAS
@@ -236,8 +254,7 @@ class ClientMqtt(): #MTEZ se crea la clase ClientMqtt
         audio=open('In_Audio_encriptado.wav.enc','wb') #USEOB ABRIMOS EL ARCHIVO DE AUDIO
         audio.write(trama) #USEOB ESCRIBIMOS EN EL ARCHIVO DE AUDIO
         audio.close() #USEOB CERRAMOS EL ARCHIVO
-        logging.info('inicia reproduccion de audio:') #USEOB COLOCAMOS LA INFO EN EL LOG
-        os.system('aplay In_Audio.wav') #USEOB REPRODUCIMOS
+
 
 
     t1 = threading.Thread(name = 'alive' , #MTEZ MANEJO DE HILO AUDIO

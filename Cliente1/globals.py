@@ -38,11 +38,11 @@ topic_Asala_1 = "audio/16/S01"
 topic_Asala_2 = "audio/16/S02"
 
 topic_usuario_3 = "usuarios/16/201700512"
-topic_usuario_2 = "usuarios/16/201701038"
+topic_usuario_2 = "usuarios/16/201114651"
 topic_usuario_1 = "usuarios/16/"+USER_ID_1  
 
 topic_Asuario_3 = "audio/16/201700512"
-topic_Asuario_2 = "audio/16/201701038"
-topic_Asuario_1 = "audio/16/201114651"
+topic_Asuario_1 = "audio/16/201701038"
+topic_Asuario_2 = "audio/16/201114651"
 
 
