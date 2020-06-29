@@ -12,6 +12,7 @@ import sys
 
 
 #MTEZ importamos los datos de conexión y variables globales
+from prueba_encriptar import Encryptor              #*****
 from brokerData import * #MTEZ Informacion de la conexion
 from globals import *    #MTEZ variables globales
 #MTEZ Configuracion inicial de logging
@@ -43,8 +44,31 @@ class ClientMqtt(): #MTEZ se crea la clase ClientMqtt
         self.client.connect(host=MQTT_HOST, port = MQTT_PORT)        #USEOB Conectar al servidor remoto
         #self.client.subscribe(('usuarios/16/201114651', 2))         #USEOB CONFIGURADO COMO ACCIÓN BLOQUEANTE    
         self.client.loop_start()
+        self.enc = Encryptor(key)              #*****
+    #def encriptar (self):
+    def texto (self, text):              #*****
+        self.text = text
+        f = open ('Texto_a_encriptar.txt','w')
+        f.write(self.text)
+        f.close()
+    def encrip_texto(self):              #*****
+        f2 = open('Texto_a_encriptar.txt','r')
+        f2_a    = f2.read()
+        f2.close()
+        f3 = open('Texto_encriptado.txt','w')
+        f3.write(f2_a)
+        f3.close()
+        self.enc.encrypt_file('Texto_encriptado.txt')
     
-    
+    def descrip_texto(self):
+        des = open('In_texto.txt.enc','rb')
+        info    = des.read()
+        des.close()
+        des2 =open('In_tex_decrypt.txt.enc','wb')
+        des2.write(info)
+        des2.close()
+        self.enc.decrypt_file('In_tex_decrypt.txt.enc')
+
     def on_publish(self, client, userdata, mid): #USEOB METODO PARA PUBLICACION SATISFACTORIA 
         publishText = 'Publicación satisfactoria'
         print(publishText)
@@ -96,8 +120,15 @@ class ClientMqtt(): #MTEZ se crea la clase ClientMqtt
 
         a_enviar = input ('Escribe mensaje ->') #MTEZ SE RECIBE EL TEXTO A ENVIAR
         a_enviar = self.USER_ID_1 + ' dice: ' + a_enviar #MTEZ se concatena el mensaje a enviar
+        self.texto(a_enviar)              #*****
+        self.encrip_texto()              #*****
+        texto = open('Texto_encriptado.txt.enc','rb')              #*****
+        datos_tex = texto.read()              #*****
+        texto.close()              #*****
+        a_enviar    = bytearray(datos_tex)              #*****
         self.client.publish((USUARIOS +'/'+ GRUPO +'/' +str(UX)), a_enviar) #MTEZ se publca en el topic respectivo, la variable a_enviar
         print('...enviado') 
+       
         self.client.loop() 
         
 
@@ -180,8 +211,16 @@ class ClientMqtt(): #MTEZ se crea la clase ClientMqtt
 
         logging.info('Grabacion finalizada, inicia reproduccion')
         os.system('aplay output.wav')    #MTEZ REPRODUCIENDO AL FINAL DE GRABAR
+
+    def entradaTexto(self, msg):              #*****
+        trama   =   msg              #*****
+        t    = open('In_texto.txt.enc','wb')              #*****
+        t.write(trama)              #*****
+        t.close()
+        logging.info('llego un texto encriptado')   
+        print('se creo el archivo encriptado')           #*****
     
-    def entrandoAudio(self,msg): #USEOB MANEJO DE METODO PARA LA ENTRADA DE UN AUDIO 
+    def entrandoAudio(self, msg): #USEOB MANEJO DE METODO PARA LA ENTRADA DE UN AUDIO 
         trama = msg #USEOB SE RECIBE LA PAYLOAD
         audio=open('In_Audio.wav','wb') #USEOB ABRIMOS EL ARCHIVO DE AUDIO
         audio.write(trama) #USEOB ESCRIBIMOS EN EL ARCHIVO DE AUDIO

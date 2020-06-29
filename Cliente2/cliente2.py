@@ -1,26 +1,25 @@
-#Los comentarios completos del código estan en Cliente1.py
 
+#CATC Importamos librerias
 
-#CART Importamoos  librerias 
 import paho.mqtt.client as mqtt
-import threading 
-import logging
 import os
 import sys
-
-#CATC impotamos  datos
+import logging
+    
+from prueba_encriptar import Encryptor              #*****
+#from prueba_encriptar import Encryptor
 from brokerData import * #CATC Informacion de la conexion
-from ClientMqtt import ClientMqtt 
-from globals import *    #CATC variables globales
+from globals import * #CATC variables globales
+from ClientMqtt import ClientMqtt #MTEZ importamos la clase ClientMqtt 
 
-# CATC Configuracion inicial de logging
+#CATC Configuracion inicial de logging
 logging.basicConfig(
-    level = logging.INFO, 
+    level = logging.INFO, #MTEZ configuramos el nivel del logging en INFO 
     format = '[%(levelname)s] (%(threadName)-10s) %(message)s'
     )
-LOG_FILENAME = 'mqtt.log'
+LOG_FILENAME = 'mqtt.log' #archivo en donde se guardará la info
 
-#CATC envio  variabels  a la  clase ClienteMqtt
+#CATC Se crea una instancia de la Clase tipo ClientMqtt, con los atributos Topics, definidos en el archivo Globals
 cli = ClientMqtt(USER_ID_1,USER_ID_2,USER_ID_3,AUDIO,USUARIOS,SALAS,GRUPO)
 
 
@@ -34,37 +33,39 @@ def on_message(client, userdata, msg):
      
     ver  =    msg.topic.split('/')
     print(str(ver[0]))
-    #CATC evalua si solo llega a los  topics audio 
+    print(str(msg.topic))
+    #CARTC evalua si solo llega a los  topics audio 
     if str(ver[0]) == "audio":
-        #CATC avisa a  que topic llega el audio 
-        logging.info("Ha llegado Un audio al topic: " + str(msg.topic))
-        cli.entrndoAudio(msg.payload)#CATC  funcion que almacena el  audio en  un archivo .wav
+        logging.info('autdio Entrando:')
+        cli.entrandoAudio(msg.payload)
+    if str(ver[0]) == 'usuarios':              #*****
+        loggin.info('Texto encriptado')              #*****
+        cli.entradaTexto(msg.payload)              #*****
         
     else:    
     #CATC Se muestra en pantalla informacion que ha llegado
         logging.info("Ha llegado el mensaje al topic: " + str(msg.topic))
         logging.info("El contenido del mensaje es: " + str(msg.payload))
 
-   
     
     #CATC Y se almacena en el log 
     logCommand = 'echo "(' + str(msg.topic) + ') -> ' + str(msg.payload) + '" >> ' + LOG_FILENAME
     os.system(logCommand)
 
-client = mqtt.Client(clean_session=True) #CATC Nueva instancia de cliente
+client = mqtt.Client(clean_session=True) #CATC Nueva instancia de Pahoclient
 client.on_connect = on_connect #CATC Se configura la funcion "Handler" cuando suceda la conexion
 client.on_message = on_message #CATC Se configura la funcion "Handler" que se activa al llegar un mensaje a un topic subscrito
 client.username_pw_set(MQTT_USER, MQTT_PASS) #CATC Credenciales requeridas por el broker
 client.connect(host=MQTT_HOST, port = MQTT_PORT) #CATC Conectar al servidor remoto
 
-#CATC Nos conectaremos a distintos topics:
+#CATC definimos cambios al quality of service:
 qos = 2
 #CATC me  suscribo a mis  topics
 client.subscribe([(topic_usuario_1, qos), (topic_sala_0, qos), (topic_sala_1, qos),(topic_sala_2, qos),(topic_Asuario_1, qos),(topic_Asala_0, qos),(topic_Asala_1, qos),(topic_Asala_2, qos)])
 
 #CATC Iniciamos el thread (implementado en paho-mqtt) para estar atentos a mensajes en los topics subscritos
 client.loop_start()
-
+#configurado como acción bloqueante
 #CATC muestra el menu  par  enviar  datos  de  audio o texto
 try:
     i=1
@@ -82,11 +83,11 @@ try:
 
                 if opcionMenu == '1':
                     #CATC se  seleciona e primer  usuario 
-                    print('va  enviar un mensaje a '+USER_ID_2+':')
+                    print('va  enviar un mensaje a '+USER_ID_1+':')
                     cli.sendTextUser(1)  #CATC invoca  la funcion enviar texto al usuario
                 elif opcionMenu == '2':
                     #CATC se  seleciona al segundo  usuario 
-                    print('va  enviar un mensaje a '+USER_ID_3+':')
+                    print('va  enviar un mensaje a '+USER_ID_2+':')
                     cli.sendTextUser(2) #CATC invoca  la funcion enviar texto al usuario
             elif opcionMenu == '2':
                 cli.roomMenu() #CATC aparece  el menu de las  salas
@@ -117,12 +118,14 @@ try:
                 opcionMenu = input('\n\tDigite Usuario -> ') 
 
                 if opcionMenu == '1':
-                    audio_t = str(input("indique el tiempo de grabación >> "))
+                    print("indique el tiempo de grabación >> ")
+                    audio_t = str(input())
                     cli.audio(audio_t) #CATC se  realiza  la grabacion de  audio 
                     cli.sendAudioUser(1)  #CATC se  realiza el envio de audio  audio
 
                 if opcionMenu == '2':
-                    audio_t = str(input("indique el tiempo de grabación >> "))
+                    print("indique el tiempo de grabación >> ")
+                    audio_t = str(input())
                     cli.audio(audio_t)#CATC se  realiza  la grabacion de  audio 
                     cli.sendAudioUser(2) #CATC se  realiza el envio de audio  audio    
 
@@ -168,19 +171,10 @@ try:
              
 
 
-
+#MTEZ excepción para desconectar el brocker
 except KeyboardInterrupt:
     logging.info('Desconectando del broker MQTT...')
     cli.disconnect()
-
-
-#CATC se  crea  un hilo para  reproducir el audio
-
-t1 = threading.Thread(name = 'AUDIO' ,
-                            target = cli.reproducir_audio ,
-                            args=(),
-                            daemon = True
-                        )
 
 # finally:
 #     cli.disconnect() 

@@ -12,10 +12,10 @@
 #CATC System filenames
 USERS_FILENAME          = "usuario.txt"
 ROOMS_FILENAME          = "salas.txt"
-
+key = b'[EX\xc8\xd5\xbfI{\xa2$\x05(\xd5\x18\xbf\xc0\x85)\x10nc\x94\x02)j\xdf\xcb\xc4\x94\x9d(\x9e'
 #CATC System ident b
-USER_ID_2                 = "201114651"
-USER_ID_1                 = "201701038"
+USER_ID_1                 = "201114651"
+USER_ID_2                 = "201701038"
 USER_ID_3                 = "201700512"
 
 
@@ -39,7 +39,7 @@ topic_Asala_2 = "audio/16/S02"
 
 topic_usuario_3 = "usuarios/16/201700512"
 topic_usuario_2 = "usuarios/16/201701038"
-topic_usuario_1 = "usuarios/16/201114651"
+topic_usuario_1 = "usuarios/16/"+USER_ID_1 
 
 topic_Asuario_3 = "audio/16/201700512"
 topic_Asuario_2 = "audio/16/201701038"

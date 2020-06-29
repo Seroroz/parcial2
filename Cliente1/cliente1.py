@@ -6,8 +6,8 @@ import os
 import sys
 import logging
     
-
-
+from prueba_encriptar import Encryptor              #*****
+#from prueba_encriptar import Encryptor
 from brokerData import * #CATC Informacion de la conexion
 from globals import * #CATC variables globales
 from ClientMqtt import ClientMqtt #MTEZ importamos la clase ClientMqtt 
@@ -32,17 +32,22 @@ def on_connect(client, userdata, rc):
 def on_message(client, userdata, msg):
      
     ver  =    msg.topic.split('/')
+    
     print(str(ver[0]))
     print(str(msg.topic))
     #CARTC evalua si solo llega a los  topics audio 
     if str(ver[0]) == "audio":
         logging.info('autdio Entrando:')
         cli.entrandoAudio(msg.payload)
-        
+    elif str(ver[0]) == 'usuarios': 
+        cli.entradaTexto(msg.payload) 
+        cli.descrip_texto() 
+        print('entro un usuario')          
     else:    
     #CATC Se muestra en pantalla informacion que ha llegado
         logging.info("Ha llegado el mensaje al topic: " + str(msg.topic))
         logging.info("El contenido del mensaje es: " + str(msg.payload))
+        logging.info("El contenido del mensaje es: " )
 
     
     #CATC Y se almacena en el log 

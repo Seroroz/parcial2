@@ -1,9 +1,6 @@
-#Los comentarios completos del código estan en Cliente1.py
 
+#MTEZ importamos librerías
 import paho.mqtt.client as paho
-#import sounddevice as sd
-#import soundfile as sf
-
 import threading 
 import binascii
 import logging
@@ -13,19 +10,20 @@ import os
 #import socket
 import sys
 
-from brokerData import * #Informacion de la conexion
 
-#from scipy.io.wavfile import write
-
-from globals import *    #variables globales
-#Configuracion inicial de logging
+#MTEZ importamos los datos de conexión y variables globales
+from prueba_encriptar import Encryptor              #*****
+from brokerData import * #MTEZ Informacion de la conexion
+from globals import *    #MTEZ variables globales
+#MTEZ Configuracion inicial de logging
 logging.basicConfig(
-    level = logging.INFO, 
+    level = logging.INFO, #MTEZ Configuramos el loggin en nivel INFO 
     format = '[%(levelname)s] (%(threadName)-10s) %(message)s'
     )
 
-class ClientMqtt():
+class ClientMqtt(): #MTEZ se crea la clase ClientMqtt 
 
+   #MTEZ el constructor, con atributos los topcis 
     def __init__(self,USER_ID_1,USER_ID_2,USER_ID_3,AUDIO,USUARIO,SALAS,GRUPO):
         self.USER_ID_1  = USER_ID_1
         self.USER_ID_2  = USER_ID_2
@@ -36,31 +34,42 @@ class ClientMqtt():
         self.GRUPO = GRUPO
        
         '''
-        Config. inicial del cliente MQTT
+        USEOB Config. inicial del cliente MQTT
         '''
-        self.client = paho.Client(clean_session=True)                #Nueva instancia de cliente
-        # client.on_connect = on_connect                          #Se configura la funcion "Handler" cuando suceda la conexion
-        self.client.on_publish = self.on_publish                          #Se configura la funcion "Handler" que se activa al publicar algo
-        self.client.on_message = self.on_message                          #Se configura la funcion "Handler" que se activa al llegar un mensaje a un topic subscrito
-        self.client.username_pw_set(MQTT_USER, MQTT_PASS)            #Credenciales requeridas por el broker
-        self.client.connect(host=MQTT_HOST, port = MQTT_PORT)        #Conectar al servidor remoto
-        #self.client.subscribe(('usuarios/16/201114651', 2))             
+        self.client = paho.Client(clean_session=True)                #USEOB Nueva instancia de cliente
+        #self.client.on_connect = on_connect                          #USEOB Se configura la funcion "Handler" cuando suceda la conexion
+        self.client.on_publish = self.on_publish                          #USEOB Se configura la funcion "Handler" que se activa al publicar algo
+        self.client.on_message = self.on_message                          #USEOB Se configura la funcion "Handler" que se activa al llegar un mensaje a un topic subscrito
+        self.client.username_pw_set(MQTT_USER, MQTT_PASS)            #USEOB Credenciales requeridas por el broker
+        self.client.connect(host=MQTT_HOST, port = MQTT_PORT)        #USEOB Conectar al servidor remoto
+        #self.client.subscribe(('usuarios/16/201114651', 2))         #USEOB CONFIGURADO COMO ACCIÓN BLOQUEANTE    
         self.client.loop_start()
+        self.enc = Encryptor(key)              #*****
+    #def encriptar (self):
+    def texto (self, text):              #*****
+        self.text = text
+        f = open ('Texto_a_encriptar.txt','w')
+        f.write(self.text)
+        f.close()
+    def encrip_texto(self):              #*****
+        f2 = open('Texto_a_encriptar.txt','r')
+        f2_a    = f2.read()
+        f2.close()
+        f3 = open('Texto_encriptado.txt','w')
+        f3.write(f2_a)
+        f3.close()
+        self.enc.encrypt_file('Texto_encriptado.txt')
     
-    
-    #USEOB fucion para indicar que se publicó
-    def on_publish(self, client, userdata, mid):                
+    def on_publish(self, client, userdata, mid): #USEOB METODO PARA PUBLICACION SATISFACTORIA 
         publishText = 'Publicación satisfactoria'
         print(publishText)
 
-    #USEOB nos notifica los mensajes entrantes
-    def on_message(self, client, userdata, msg):
+    def on_message(self, client, userdata, msg): #USEOB METODO PARA MANEJO DE FUNCION ON_MESSAGE
         os.system('clear')  
         print(str(msg.payload))
         print ('\nPresione cualquier tecla para continuar')
 
-    #USEOB es el menú principal
-    def mainMenu(self): 
+    def mainMenu(self): #USEOB MÉTODO DE MANEJO DEL MENU PRINCIPAL
         os.system('clear') 
         print ('Menú principal')
         print ('\t1 - Enviar texto')
@@ -70,22 +79,21 @@ class ClientMqtt():
         print ('\t5 - Salir')
 
     
-    #USEOB menú de selección
-    def typeMenu(self):  
+
+    def typeMenu(self):  #USEOB METODO PARA EL MENU SELECTOR DE USUARIO O SALA
         os.system('clear') 
-        print ('Seleccione una opcion')
+        print ('Seleccione Usuario')
         print ('\t1 - Enviar a usuario')
         print ('\t2 - Enviar a sala')
 
-    #USEOB menú de usuarios
-    def userMenu(self):  
+    def userMenu(self):  #USEOBMETODO PARA EL SELECTOR DE USUARIO
         os.system('clear') 
-        print ('Seleccione Seleccione un usuario')
+        print ('Seleccione Sala')
         print ('\t1 -'+ USER_ID_2)
         print ('\t2 -'+ USER_ID_3)
        
-    #USEOB menú de salas
-    def roomMenu(self):  
+    
+    def roomMenu(self):  #USEOB METODO PARA EL SELECTOR DE SALA
         os.system('clear') 
         print ('Seleccione Sala')
         print ('\t0 - S00')
@@ -93,35 +101,40 @@ class ClientMqtt():
         print ('\t2 - S02')
         print ('\t3 - S03')
 
-    #USEOB funcion para enviar mensaje a un usuario
-    def sendTextUser(self,num):
-        #os.system('clear')
-
-        #USEOB se diferencia al usuario destinatario
-        self.num = num  
+    def sendTextUser(self,num): #MTEZ método para enviar texto a usuario
+        #os.system('clear'
+        self.num = num  #MTEZ SE RECIBE EL NUMERO SELECTOR DE USUARIO
         if num == 1:
             UX = USER_ID_2
         else:
             UX = USER_ID_3 
 
-        a_enviar = input ('Escribe mensaje ->')
-        a_enviar = self.USER_ID_1 + ' dice: ' + a_enviar
-        self.client.publish((USUARIOS +'/'+ GRUPO +'/' +str(UX)), a_enviar)
+        a_enviar = input ('Escribe mensaje ->') #MTEZ SE RECIBE EL TEXTO A ENVIAR
+        a_enviar = self.USER_ID_1 + ' dice: ' + a_enviar #MTEZ se concatena el mensaje a enviar
+        self.texto(a_enviar)              #*****
+        self.encrip_texto()              #*****
+        texto = open('Texto_encriptado.txt.enc','rb')              #*****
+        datos_tex = texto.read()              #*****
+        texto.close()              #*****
+        a_enviar    = bytearray(datos_tex)          #*****
+        print(type(a_enviar))
+        self.client.publish((USUARIOS +'/'+ GRUPO +'/' +str(UX)), a_enviar) #MTEZ se publca en el topic respectivo, la variable a_enviar
         print('...enviado') 
-        self.client.loop()
+       
+        self.client.loop() 
+        
 
-    #USEOB funcion para enviar texto a una sala
-    def sendTextRoom(self,num):
+    def sendTextRoom(self,num): #MTEZ METODO PARA EL ENVIO DE TEXTO A SALA
         #os.system('clear')
-        self.num=num             
-        a_enviar = input ('Escribe mensaje ->')
-        a_enviar = self.USER_ID_1 + ' dice: ' + a_enviar
-        self.client.publish((SALAS+'/'+ GRUPO +"/S0"+ str(num)),  a_enviar )
+        self.num=num  
+                   
+        a_enviar = input ('Escribe mensaje ->') #MTEZ SE RECIBE EL TEXTO A ENVIAR
+        a_enviar = self.USER_ID_1 + ' dice: ' + a_enviar #MTEZ se concatena el mensaje a enviar
+        self.client.publish((SALAS+'/'+ GRUPO +"/S0"+ str(num)),  a_enviar ) #MTEZ se publca en el topic respectivo, la variable a_enviar
         print('...enviado') 
         self.client.loop()
 
-    #USEOB funcion para enviar audio a un usuario
-    def sendAudioUser(self,num):
+    def sendAudioUser(self,num): #USEOB METODO PARA EL ENVIO DE AUDIO
         #os.system('clear')
         self.num=num 
         if num == 1:
@@ -129,94 +142,92 @@ class ClientMqtt():
         else:
             UX = USER_ID_3  
         
-        size = (os.stat('output.wav').st_size)
-        print(size)
-        a_enviar = b'\x03' + bytes("201700512", 'utf-8') + bytes(str(size), 'utf-8')
-        self.enviar_audioU(num)
-        self.client.publish((AUDIO+'/'+GRUPO+'/'+str(UX)),a_enviar)
+        size = (os.stat('output.wav').st_size) #USEOB SE RECIBE EL TAMAÑO DEL ARCHIVO
+        print(size) 
+        a_enviar = b'\x03' + bytes("201700512", 'utf-8') + bytes(str(size), 'utf-8') #USEOB SE CONCATENA EL MENSAJE A ENVIAR
+        self.enviar_audioU(num) #USEOB SE LLAMA AL METODO ENVIAR AUDIO
+        self.client.publish((AUDIO+'/'+GRUPO+'/'+str(UX)),a_enviar) #USEOB SE HACE LA PUBLICACION EN EL TOPIC
         logging.info('...enviado') 
 
-    #USEOB funcion para enviar audio a una sala
-    def sendAudioRoom(self,num):
+    def sendAudioRoom(self,num): #USEOB METODO PARA EL ENVÍO DE AUDIO A SALAS
         #os.system('clear')
         self.num=num  
 
-        size = (os.stat('output.wav').st_size)
+        size = (os.stat('output.wav').st_size) #USEOB SE OBTIENE EL TAMAÑO DEL ARCHIVO
         print(size)
-        a_enviar = b'\x03' + bytes("201700512", 'utf-8') + bytes(str(size), 'utf-8')
-        self.client.publish((AUDIO+'/'+GRUPO +"/S0"+ str(num)),a_enviar )
-        self.enviar_audioR(num)
+        a_enviar = b'\x03' + bytes("201700512", 'utf-8') + bytes(str(size), 'utf-8') #USEOB SE CONCATENA EL MENSAJE A ENVIAR
+        self.client.publish((AUDIO+'/'+GRUPO +"/S0"+ str(num)),a_enviar ) #USEOB SE CONCATENA EL MENSAJE A ENVIAR
+        self.enviar_audioR(num) #USEOB SE LLAMA AL METODO ENVIAR AUDIO
         logging.info('...enviado') 
 
-    #USEOB funcion para desconectarse del broker
-    def disconnect(self):
+    def disconnect(self): #USEOB METODO PARA DESCONEXIÓN DEL BROKER
         self.client.disconnect()
 
-    #USEOB algoritmo para enviar audio a el usuario seleccionado
-    def enviar_audioU(self,num):
-            self.num=num 
+
+    def enviar_audioU(self,num): #MTEZ METODO PARA EL ENVIO DE AUDIO
+            self.num=num    #MTEZ SELECCION DE USUARIO
             if num == 1:
                 UX = USER_ID_2
             else:
                 UX = USER_ID_3  
-            filename = 'output.wav'
-            f = open(filename, "rb")
-            imagestring = f.read()
-            f.close()
-            byteArray = bytearray(imagestring)        
-            self.client.publish((AUDIO+'/'+GRUPO+'/'+str(UX)), byteArray)
+            filename = 'output.wav' #MTEZ SELECION DEL ARCHIVO Y SE GUARDA EN FILENAME
+            f = open(filename, "rb") #MTEZ SE ABRE EL ARCHIVO EN MODO BINARIO Y CON PERMISOS DE REESCRITURA
+            imagestring = f.read() #MTEZ LECTURA DEL ARCHIVO Y SE GUARDA COMO ARREGLO BINARIO
+            f.close() #MTEZ CERRAMOS EL ARCHIVO
+            byteArray = bytearray(imagestring) #MTEZGUARDAMOS LA CADENA DE DATOS EN UNA VARIABLE DE TIPO BYTEARRAY       
+            self.client.publish((AUDIO+'/'+GRUPO+'/'+str(UX)), byteArray) #MTEZ SE PUBLICA EN EL USUARIO
 
-    #USEOB envia el audio a una sala
-    def enviar_audioR(self,num):
+    def enviar_audioR(self,num): #MTEZ METODO PARA EL ENVIO DE AUDIO A SALAS, EL MANEJO DE ARCHIVOS ES IGUAL
             self.num=num  
             filename = 'output.wav'
             f = open(filename, "rb")
             imagestring = f.read()
             f.close()
             byteArray = bytearray(imagestring)        
-            self.client.publish((AUDIO+'/'+GRUPO +"/S0"+ str(num)), byteArray)
+            self.client.publish((AUDIO+'/'+GRUPO +"/S0"+ str(num)), byteArray) #SE PUBLICA EN LA SALA INDICADA
 
-    #USEOB uso de os para reproducir audio enviado
-    def reproducir_audio(self):
+    def reproducir_audio(self): #MTEZ METODO PARA REPRODUCIR AUDIO ATRAVEZ DE ESCRIBIR EN SISTEMA
             print ('Reproduciendo') 
             os.system('aplay output.wav')
 
-    #USEOB uso de os para reproducir audio 
-    def reproducir_audio_R(self):
+    def reproducir_audio_R(self): #MTEZ METODO PARA REPRODUCIR AUDIO DE NUEVO
             print ('Reproduciendo') 
-            os.system('aplay In_Audio.wav')  
-
-    #USEOB FUNCION QUE INICIALIZA UNA GRABACION
-    def audio(self, auidop_seg):
-        self.auidop_seg = auidop_seg
+            os.system('aplay In_Audio.wav')        
+    
+    def audio(self, auidop_seg): #MTEZ METODO PARA LA OBTENER LA GRABACION
+        self.auidop_seg = auidop_seg 
         seconds = auidop_seg  # Duration of recording
 
-        logging.info('Comenzando grabacion')
-        os.system('arecord -d ' + seconds +' -f U8 -r 8000 output.wav')
+        logging.info('Comenzando grabacion') #MTEZ DURACION DE LA GRABACION
+        os.system('arecord -d ' + seconds +' -f U8 -r 8000 output.wav') #MTEZ GRABANDO CON LA DURACION ESPECIFICADA
 
         logging.info('Grabacion finalizada, inicia reproduccion')
-        os.system('aplay output.wav')    
+        os.system('aplay output.wav')    #MTEZ REPRODUCIENDO AL FINAL DE GRABAR
+
+    def entradaTexto(self,msg):              #*****
+        trama   =   msg              #*****
+        text    = open('In_texto.txt.enc','wb')              #*****
+        text.write(trama)              #*****
+        text.close()
+        logging.info('llego un texto encriptado')              #*****
     
-    #USEOB FUNCION PARA GRABAR AUDIO PARA ENVIO 
-    def entrandoAudio(self,msg):
-        trama = msg
-        audio=open('In_Audio.wav','wb')
-        audio.write(trama)
-        audio.close()
-        logging.info('inicia reproduccion de audio:')
-        os.system('aplay In_Audio.wav')
+    def entrandoAudio(self,msg): #USEOB MANEJO DE METODO PARA LA ENTRADA DE UN AUDIO 
+        trama = msg #USEOB SE RECIBE LA PAYLOAD
+        audio=open('In_Audio.wav','wb') #USEOB ABRIMOS EL ARCHIVO DE AUDIO
+        audio.write(trama) #USEOB ESCRIBIMOS EN EL ARCHIVO DE AUDIO
+        audio.close() #USEOB CERRAMOS EL ARCHIVO
+        logging.info('inicia reproduccion de audio:') #USEOB COLOCAMOS LA INFO EN EL LOG
+        os.system('aplay In_Audio.wav') #USEOB REPRODUCIMOS
 
 
-    t1 = threading.Thread(name = 'alive' ,
-                            target = audio ,
-                            daemon = True
+    t1 = threading.Thread(name = 'alive' , #MTEZ MANEJO DE HILO AUDIO
+                            target = audio , #MTEZ SE INDICA LA FUNCIÓN OBJETIVO
+                            daemon = True #LEVANTA EL HILO COMO DEMONIO PARA QUE MUERA CUANDO FINALICE EL PROCES
                         )
                         
-    t2 = threading.Thread(name= 'alive', target= entrandoAudio , daemon= True)
+    t2 = threading.Thread(name= 'alive', target= entrandoAudio , daemon= True) #MTEZ MANEJO DE HILO ENTRANDOAUDIO
 
-    listaHilos = []
-    t1.start()
-    t2.start()
+    listaHilos = [] #MTEZ SE DEFINE LA LISTA DE HILOS 
+    t1.start() #MTEZ MANEJO DE HILO AUDIO ARRIBA
+    t2.start() #MTEZ MANEJO DE HILO ENTRANDOAUDIO ARRIBA
 
-    
-       
