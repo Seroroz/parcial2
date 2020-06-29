@@ -59,6 +59,15 @@ class ClientMqtt(): #MTEZ se crea la clase ClientMqtt
         f3.write(f2_a)
         f3.close()
         self.enc.encrypt_file('Texto_encriptado.txt')
+
+    def encrip_audio(self):
+        aud = open('output.wav','rb')
+        audi = aud.read()
+        aud.close()
+        audio_copia = open('Audio_encriptado.wav','wb')
+        audio_copia.write(audi)
+        audio_copia.close()
+        self.enc.encrypt_file('Audio_encriptado.wav')
     
     def descrip_texto(self):
         des = open('In_texto.txt.enc','rb')
@@ -142,7 +151,7 @@ class ClientMqtt(): #MTEZ se crea la clase ClientMqtt
         print('...enviado') 
         self.client.loop()
 
-    def sendAudioUser(self,num): #USEOB METODO PARA EL ENVIO DE AUDIO
+    def sendAudioUser(self,num): #USEOB METODO PARA EL ENVIO DE AUDIO ........
         #os.system('clear')
         self.num=num 
         if num == 1:
@@ -150,7 +159,7 @@ class ClientMqtt(): #MTEZ se crea la clase ClientMqtt
         else:
             UX = USER_ID_3  
         
-        size = (os.stat('output.wav').st_size) #USEOB SE RECIBE EL TAMAÑO DEL ARCHIVO
+        size = (os.stat('Audio_encriptado.wav.enc').st_size) #USEOB SE RECIBE EL TAMAÑO DEL ARCHIVO
         print(size) 
         a_enviar = b'\x03' + bytes("201700512", 'utf-8') + bytes(str(size), 'utf-8') #USEOB SE CONCATENA EL MENSAJE A ENVIAR
         self.enviar_audioU(num) #USEOB SE LLAMA AL METODO ENVIAR AUDIO
@@ -178,10 +187,12 @@ class ClientMqtt(): #MTEZ se crea la clase ClientMqtt
                 UX = USER_ID_2
             else:
                 UX = USER_ID_3  
-            filename = 'output.wav' #MTEZ SELECION DEL ARCHIVO Y SE GUARDA EN FILENAME
+            self.encrip_audio()
+            filename = 'Audio_encriptado.wav.enc' #MTEZ SELECION DEL ARCHIVO Y SE GUARDA EN FILENAME
             f = open(filename, "rb") #MTEZ SE ABRE EL ARCHIVO EN MODO BINARIO Y CON PERMISOS DE REESCRITURA
             imagestring = f.read() #MTEZ LECTURA DEL ARCHIVO Y SE GUARDA COMO ARREGLO BINARIO
             f.close() #MTEZ CERRAMOS EL ARCHIVO
+            #encriptar audio
             byteArray = bytearray(imagestring) #MTEZGUARDAMOS LA CADENA DE DATOS EN UNA VARIABLE DE TIPO BYTEARRAY       
             self.client.publish((AUDIO+'/'+GRUPO+'/'+str(UX)), byteArray) #MTEZ SE PUBLICA EN EL USUARIO
 
@@ -222,7 +233,7 @@ class ClientMqtt(): #MTEZ se crea la clase ClientMqtt
     
     def entrandoAudio(self, msg): #USEOB MANEJO DE METODO PARA LA ENTRADA DE UN AUDIO 
         trama = msg #USEOB SE RECIBE LA PAYLOAD
-        audio=open('In_Audio.wav','wb') #USEOB ABRIMOS EL ARCHIVO DE AUDIO
+        audio=open('In_Audio_encriptado.wav.enc','wb') #USEOB ABRIMOS EL ARCHIVO DE AUDIO
         audio.write(trama) #USEOB ESCRIBIMOS EN EL ARCHIVO DE AUDIO
         audio.close() #USEOB CERRAMOS EL ARCHIVO
         logging.info('inicia reproduccion de audio:') #USEOB COLOCAMOS LA INFO EN EL LOG
